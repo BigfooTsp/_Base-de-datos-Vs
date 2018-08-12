@@ -68,7 +68,7 @@ class Field_element:
 	pass
 
 
-class BDD_Field:
+class BBDD_Field:
 	''' Diccionario que representa un campo y que contendrá parejas 
 	{identificador : objeto}. Heredará el tipo de objeto que formarán
 	sus elementos y los métodos propios de este se añadirán a los comandos de
@@ -128,7 +128,7 @@ class BDD_Field:
 #		                     Clase Base de Datos                              #
 ################################################################################
 
-class BDD_Base:
+class BBDD_Base:
 	''' Clase base de la base de datos. Se añadirán los diferentes campos al
 	diccionario 'campos' que serán todos subclases de BDD_Field '''
 	global VEvent, cad_basic_commands, cad_especific_commands
@@ -196,7 +196,7 @@ class BBDD_Operator:
 	def create_BBdd(self, BBDD, ficheroBBdd):
 		'''Crea una nueva base de datos.'''	
 		if not os.path.isfile(ficheroBBdd + ".pickle"):
-			self.Bdd = BDD_Base()
+			self.Bdd = BBDD_Base()
 			ficheroBBdd += ".pickle"
 			self.ficheroBBdd = ficheroBBdd
 			if self.save_BBdd():

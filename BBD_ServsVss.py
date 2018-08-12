@@ -4,44 +4,40 @@
 #       8 Agosto 2018    													   #
 ################################################################################
 
-from BBBD_2.0 import Field_Element, BBDD_Field, BBDD_Base, BBDD_Operator
 import time
-import copy
+from dataclasses import dataclass, field
+from BBDD_2 import BBDD_Base, BBDD_Field, BBDD_Operator, Field_element, mainLoop
 
 ################################################################################
-#                 			Clases para Campo VS                               #
+#                    Clases para atributos de elementos                        #
 ################################################################################
-
-################################# Historial ####################################
-
-class ObjNota:
-	'''Objeto básico que contiene una nota.'''
-	def __init__(self, text:str, tag:str):
-		self.nota={"text":text, "tag":tag, "fecha":time.strftime("%d-%m-%Y  %H:%M ")}
-
-	def __str__(self):
-		cad = (
-			f'''
-			------------------------------------------
-			NOTA: 	{self.nota['fecha']}
-			------------------------------------------
-			TAG:     {self.nota['tag']}
-			
-			{self.nota["text"]}
-			------------------------------------------	
-			''')
-		return cad
-
 
 class ObjNotas:
 	'''Objeto de control para las notas.'''
 	def __init__(self):
 		self.notas=[]
 
+	class ObjNota:
+		'''Objeto básico que contiene una nota.'''
+		def __init__(self, text:str, tag:str):
+			self.nota={"text":text, "tag":tag, "fecha":time.strftime("%d-%m-%Y  %H:%M ")}
+
+		def __str__(self):
+			cad = (
+				f'''
+				------------------------------------------
+				NOTA: 	{self.nota['fecha']}
+				------------------------------------------
+				TAG:     {self.nota['tag']}
+				
+				{self.nota["text"]}
+				------------------------------------------	
+				''')
+			return cad
 
 	def add_note(self, text:str, tag:str="nota") -> True:
 		'''Añade una nueva nota.''' 
-		self.notas.append(ObjNota(text, tag))
+		self.notas.append(self.ObjNota(text, tag))
 		return True
 
 
@@ -85,15 +81,6 @@ class ObjNotas:
 		return 'Índice de nota incorrecto'
 
 
-class ObjHistorial(ObjNotas):
-	'''Objeto que gestiona la antiguedad, las notas y las vacaciones.'''
-	def __init__(self):
-		super().__init__() #self.notas = []
-		self.vacaciones = ObjVacaciones() 	# Vacaciones (objeto que contiene vacaciones y disfrutadas)
-		self.antiguedad = None
-
-################################# Vacaciones ###################################
-
 class ObjVacaciones:
 	''' Se encargará de gestionar las vacaciones pendientes y disfrutadas
 	de los operarios así como un historial de ellas'''
@@ -102,18 +89,36 @@ class ObjVacaciones:
 		self.pendientes = None
 		self.asigandas = None
 
-########################## Elemento de campo:  Vs ##############################
+
+class ObjDireccion:
+	None
+
+
+class ObjAntiguedad:
+	'''Clase que contiene información sobre la antigüedad del operario.'''
+	def __init__(self, fecha=None):
+		self.fecha = None
+
+	def get_antiguedad(self):
+		'''Calcula y devuelve el tiempo que lleva el operario en la empresa
+		teniendo en cuenta la fecha del dispositivo actual.'''
+		None
+################################################################################
+#                    Clases para los campos de la Base de Datos                #
+################################################################################
 
 @dataclass
-class Vs(Field_Element):
-	''' objeto operarios '''
+class ObjVs(Field_element):
+	'''Campo que contiene los operarios.'''
 	nombre:str
 	id:int = None			# Nº identificación de empresa
 	telf:str = None
-	movilidad:str = None				# Fijo en servicio, correturnos o sin servicio.
-	tip:int = None				# Nº tarjeta interprofesional
+	movilidad:str = None	# Fijo en servicio, correturnos o sin servicio.
+	tip:int = None			# Nº tarjeta interprofesional
 	servicio_asignado:str = None
-	historial:ObjHistorial = field(default_factory=ObjHistorial)
+	antiguedad:ObjAntiguedad = field(default_factory=ObjAntiguedad)
+	vacaciones:ObjVacaciones = field(default_factory=ObjVacaciones)
+	historial:ObjNotas = field(default_factory=ObjNotas)
 
 	def __str__(self):
 		cad = (
@@ -126,7 +131,7 @@ class Vs(Field_Element):
 			id Empresa:	{self.id}
 			TIP: 		{self.tip}
 			Movilidad 	{self.movilidad}
-			Antigüedad 	{self.historial.antiguedad}
+			Antigüedad 	{self.antiguedad.fecha}
 			------------------------------------------
 			
 			''')
@@ -140,7 +145,32 @@ class Vs(Field_Element):
 		# [ ] Edita nota en historial
 		# [ ] Muestra nota de historial
 		# [ ] Borra nota de historial
+		# [ ] Obtiene antigüedad del operario
 
 
+class ObjServ(BBDD_Field):
+	'''Campo que contiene los servicios.'''
+	None
 
-class VsField(BBDD_Field)
+
+class ObjRelaciones(BBDD_Base):
+	'''Campo que relaciona los vs y servicios de la base de datos.'''
+	None	
+
+
+################################################################################
+#                         Clases para  la Base de Datos                        #
+################################################################################
+
+class BBDD_Serv_Vs(BBDD_Base):
+	None	
+
+################################################################################
+#		                 Funcionando como script.                              #
+################################################################################
+
+def main():
+	mainLoop()
+
+if __name__ == '__main__':
+	main()

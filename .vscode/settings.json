@@ -1,2 +1,12 @@
 {
+    "python.unitTest.unittestArgs": [
+        "-v",
+        "-s",
+        "./Bdd_Vs v.1.0",
+        "-p",
+        "test_*.py"
+    ],
+    "python.unitTest.pyTestEnabled": false,
+    "python.unitTest.nosetestsEnabled": false,
+    "python.unitTest.unittestEnabled": true
 }

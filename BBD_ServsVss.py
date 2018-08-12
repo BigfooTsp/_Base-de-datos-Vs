@@ -4,7 +4,7 @@
 #       8 Agosto 2018    													   #
 ################################################################################
 
-from BBD_2 import Field_Element, BDD_Field, BDD_Base, BDD_Operator
+from BBBD_2.0 import Field_Element, BBDD_Field, BBDD_Base, BBDD_Operator
 import time
 import copy
 
@@ -143,4 +143,4 @@ class Vs(Field_Element):
 
 
 
-class VsField(BDD_Field)
+class VsField(BBDD_Field)

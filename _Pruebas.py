@@ -1,5 +1,8 @@
-cad = '2+4'
+def da(cad):
+    eval(cad)
 
-print (cad)
+input = ['da', "print('rhrh')"]
+fun = eval(input[0])
+arg = input[1]
 
-print (eval(cad))
+fun(arg)

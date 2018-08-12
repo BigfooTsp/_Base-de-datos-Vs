@@ -109,7 +109,8 @@ class ObjAntiguedad:
 
 @dataclass
 class ObjVs(Field_element):
-	'''Campo que contiene los operarios.'''
+	'''Campo que contiene los operarios. Se debe de configurar el método
+	comand() con super() si hay que introducir comandos específicos'''
 	nombre:str
 	id:int = None			# Nº identificación de empresa
 	telf:str = None
@@ -137,7 +138,7 @@ class ObjVs(Field_element):
 			''')
 		return cad
 
-	def runFieldComand(self, comand:str) -> str:
+	def comand(self, comand:str) -> str:
 		'''lista de comandos esepcíficos para el tipo de objeto. Devuelve 
 		evento en forma de texto que será procesado por la clase operadora'''
 		# [ ] Añade nota en historial

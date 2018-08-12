@@ -17,6 +17,12 @@ cad_especific_commands = f'''
 	COMADOS ESPECÍFICOS:'''
 
 ''' TAREAS:
+	[ ] Para los ocmandos crear un diccionario global que como llave tendrá el objeto 
+	del que proceden y como argumento una lista o namedtuple con los comandos y posiblemente su 
+	explicación. 
+	[ ] Tiene que cambiarse los métodos de los fields para que no se repitan
+	a cada instancia y ponerlos en la base de datos.
+
 	[ ] La clase BDD_Base tiene que ser superclase de las bases de datos
 		futuras. Debe de tener los métodos básicos para CRUD y los
 		diferentes campos (subclases de BDD_Field) se añadirán en la
@@ -284,6 +290,7 @@ def readCommand(com):
 
 
 def mainLoop():
+	'''Inicia bucle para recibir comandos y getionar eventos.'''
 	while len(VEvent) == 0:
 		com = input('>>> Escribe comando.> ')
 		readCommand(com)

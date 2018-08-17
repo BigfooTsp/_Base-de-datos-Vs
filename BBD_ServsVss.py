@@ -6,7 +6,7 @@
 
 import time
 from dataclasses import dataclass, field
-from BBDD_2 import BBDD_Base, BBDD_Field, BBDD_Operator, Field_element, mainLoop
+from BBDD_2 import BBDD_Base, BBDD_Field, BBDD_Operator
 
 ################################################################################
 #                    Clases para atributos de elementos                        #
@@ -108,7 +108,7 @@ class ObjAntiguedad:
 ################################################################################
 
 @dataclass
-class ObjVs(Field_element):
+class ObjVs:
 	'''Campo que contiene los operarios. Se debe de configurar el método
 	comand() con super() si hay que introducir comandos específicos'''
 	nombre:str
@@ -138,15 +138,6 @@ class ObjVs(Field_element):
 			''')
 		return cad
 
-	def comand(self, comand:str) -> str:
-		'''lista de comandos esepcíficos para el tipo de objeto. Devuelve 
-		evento en forma de texto que será procesado por la clase operadora'''
-		# [ ] Añade nota en historial
-		# [ ] Busca nota en historial
-		# [ ] Edita nota en historial
-		# [ ] Muestra nota de historial
-		# [ ] Borra nota de historial
-		# [ ] Obtiene antigüedad del operario
 
 
 class ObjServ(BBDD_Field):
@@ -154,7 +145,7 @@ class ObjServ(BBDD_Field):
 	None
 
 
-class ObjRelaciones(BBDD_Base):
+class ObjRelaciones(BBDD_Field):
 	'''Campo que relaciona los vs y servicios de la base de datos.'''
 	None	
 
@@ -171,7 +162,7 @@ class BBDD_Serv_Vs(BBDD_Base):
 ################################################################################
 
 def main():
-	mainLoop()
+	None
 
 if __name__ == '__main__':
 	main()

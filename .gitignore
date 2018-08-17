@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+_Pruebas.py
+_Pruebas2.py
 
 # C extensions
 *.so

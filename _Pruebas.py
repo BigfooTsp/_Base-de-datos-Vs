@@ -1,8 +1,4 @@
-def da(cad):
-    eval(cad)
+l = [1,2]
 
-input = ['da', "print('rhrh')"]
-fun = eval(input[0])
-arg = input[1]
-
-fun(arg)
+print (l.index(2))
+print(1 in l)

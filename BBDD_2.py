@@ -4,130 +4,135 @@
 #       8 Agosto 2018    													   #
 ################################################################################
 
-import pickle
-import os
-from dataclasses import dataclass, field
-import copy
+import pickle, os, copy
+from typing import Dict, Callable, Optional, Any, List, Tuple
+
+################################################################################
+#		           Clase para gestión de comandos y eventos                    #
+################################################################################
 
 VEvent = []
-cad_basic_commands = f'''
-	COMANDOS BÁSICOS:'''
-cad_especific_commands = f'''
 
-	COMADOS ESPECÍFICOS:'''
+class CommandsAndEvents:
+	'''Clase que constiene todos los comandos y eventos con efectos'''
+	global VEvent
+	VEvent:       List[str]          = []
+	event_dict:   Dict[str:Callable] = {}
+	command_list: List[Callable]     = [] 
 
-''' TAREAS:
-	[ ] Para los ocmandos crear un diccionario global que como llave tendrá el objeto 
-	del que proceden y como argumento una lista o namedtuple con los comandos y posiblemente su 
-	explicación. 
-	[ ] Tiene que cambiarse los métodos de los fields para que no se repitan
-	a cada instancia y ponerlos en la base de datos.
+	@classmethod
+	def add_command(cls, func:Callable) -> int:
+		'''Añade los comandos que incluye un objeto al ser instanciado.'''
+		res = []
+		if not func in CommandsAndEvents.command_list:
+			CommandsAndEvents.command_list.append(func)
+		else:
+			res.append(f'El comando {str(func)} ya existe.')
+		if len(res) > 0:
+			return res
+		else:
+			return 0
 
-	[ ] La clase BDD_Base tiene que ser superclase de las bases de datos
-		futuras. Debe de tener los métodos básicos para CRUD y los
-		diferentes campos (subclases de BDD_Field) se añadirán en la
-		clase BDD final.
 
-	[ ] La clase BDD_Operator debe de crear, cargar y borrar los
-		archivos de base de datos y gestionar los eventos virtuales
-		creados por cambios en otros campos que influyen en otros campos.
+	@classmethod
+	def add_event(cls, event:str, func:Callable) -> int:
+		res = []
+		'''Añade los eventos que incluye un objeto al ser instanciado.'''
+		if not func in CommandsAndEvents.event_dict:
+			CommandsAndEvents.event_dict.update({event:func})
+		else:
+			res.append(f'El evento {event} ya existe.')
+		if len(res) > 0:
+			return res
+		else:
+			return 0
 
-	[ ] La clase BDD_Field deberá de ser sublase de los diferentes módulos
-		que crearán en campo. Debe de tener los métodos de crear, editar y 
-		borrar los diferentes objetos que tendrá ese campo así como de listar 
-		los comandos que gestionarán esos objetos y que asumirá finalmente 
-		el gestor de eventos virtuales de la clase operadora.
+	def command_help(self, command:Optional[str] = None) -> str:
+		'''Ayuda para los comandos. Si no se especifica, entrega lista con 
+		todos los comandos.'''
+		for c in self.command_list:
+			if not command:
+				return f'''		AYUDA DE COMANDOS:
+				{c.__name__}
+				{c.__doc__}
+				'''
+			elif command:
+				if eval(command) in self.command_list:
+					i = self.command_list.index(command)
+					return self.command_list[i].__doc__
+				else:
+					return f'Comando {command} no existe.'
 
-	[ ] La incorporación de los comandos surge por la necesidad de obtener 
-		una respuesta a cada acción para ver si genera un evento virtual y 
-		para gestionar estos eventos virtuales cada vez que se realiza un
-		cambio. Eventos virtuales son para relacionar los diferentes campos
-		de la base de datos cuando se necesita que un cambio en uno de ellos 
-		afecte a otros.
 
-	[ ] Para los comandos hay que crear una clase comando y otrs comandos 
-		que recogerá los comandos específicos de cada objeto. 
-	'''
+	def manageEvents(self) -> int:
+		'''Ejecuta los eventos de VEvent.'''
+		if len(VEvent) > 0:
+			for event in VEvent:
+				if event in self.event_dict:
+					try:
+						self.event_dict[event]
+						del event
+						return 1
+					except Exception as err:
+						return f'''Evento {event} no ejecutado. {err}'''
+
+
+	def manageComands(self, com:str) -> int:
+		'''Ejecuta los comandos.'''
+		c = com.split(' ', 1)
+		command = eval(c[0])
+		args = eval(c[1])
+		if command in self.command_list:
+			i = self.command_list.index(command)
+			func = self.command_list[i]
+			try:
+				func(args)
+				return 1
+			except Exception as err:
+				return f'Comando {str(command)} no ejecutado {err}'
+		else:
+			return 'Comando no reconocido.'
+
+
+	def loop(self):
+		'''Inicia el bucle que recibe los comandos.'''
+		while True:
+			com = input('>>> Escriba comando -> ')
+			self.manageComands(com)
+			self.manageEvents()
+
 
 
 ################################################################################
 #		                  Clase Campo de Base de Datos                         #
 ################################################################################
 
-class Field_element:
-	'''clase padre de BDD_field que contendrá los atributos y métodos propios
-	que serán gestionados por comandos especificados en esta clase y que se
-	gestionqarán desde la clase operadora.'''
-	global VEvent, cad_especific_commands
-
-	def __init__(self, name:str, **kwargs):
-		self.name = name
-
-	########################## Gestión de comandos #############################
-	# Añade al help la lista de comandos del objeto.
-	cad_especific_commands += f'''
-	'''
-	def command(self, command:str) -> True or VEvent:
-		'''Ejecuta los comandos en este objeto.
-		Si un comando genera un evento se debe de especificar en su ejecución
-		el valor de este en la variable global 'VEvent' '''
-	pass
-
 
 class BBDD_Field:
 	''' Diccionario que representa un campo y que contendrá parejas 
-	{identificador : objeto}. Heredará el tipo de objeto que formarán
-	sus elementos y los métodos propios de este se añadirán a los comandos de
-	la clase operadora.'''
-	global VEvent, cad_basic_commands, cad_especific_commands
+	{identificador : objeto}. Esto se instanciará con los argumentos 
+	[nombre de campo, objeto de campo]'''
+	def __init__(self, obj_class:Optional[type] = None):
+		# La clase del objeto que se añadirá al campo
+		self.obj:     Optional[type] = obj_class
+		# Tipo de los elementos del campo = {'Name', type}
+		self.element: Dict[str:type] = {}
+		# Añadiendo comandos y eventos
+		self.addComAndEv()
 
-	def __init__(self, name:str, obj_class):
-		self.name = name
-		self.obj = obj_class 	# La clase del objeto que se añadirá al campo
-		self.element = {} 	# element = {'Name':None, 'Object':None}
-
-	def create_element(self, **kwargs):
-		'''Añade un elemento al campo.'''
-		self.element[kwargs['name']] = self.obj(**kwargs)
-		return True
-
-	def read_element(self, element_name:str) -> True:
-		'''Devuelve una copia de un elemento específico.'''
-		return copy.deepcopy(self.element[element_name])
-
-	def update_element(self, element:Field_element) -> True:
-		'''Acutaliza un elemento.'''
-		self.element[element.name] = element
-		return True
-
-	def delete_element(self, element_name:str) -> True:
-		'''Elimina un elemento.'''
-		del self.element[element_name]
-		return True
-
-	########################## Gestión de comandos #############################
-	# Añade al help la lista de comandos del objeto.
-	cad_basic_commands += f'''
-	create_element
-	read_element
-	update_element
-	delete_element'''
-
-	def command(self, command:str, *arg, **kwargs):
-		'''Ejecuta los comandos en este objeto.
-		Si un comando genera un evento se debe de especificar en su ejecución
-		el valor de este en la variable global 'VEvent' '''
-		# Ejecuta los comandos.
-		if command.startswith('create_element'):
-			self.create_element(*arg, **kwargs)
-		elif command.startswith('read_element'):
-			self.read_element(*arg, **kwargs)
-		elif command.startswith('update_element'):
-			self.update_element(*arg, **kwargs)
-		elif command.startswith('delete_element'):
-			self.delete_element(*arg, **kwargs)
-		else:
-			return 'INCORRECT_COMMAND'
+	############### Introducción de comandos y eventos. #####################
+	def addComAndEv(self):
+		# newcomand = (func, help)
+		basic_commands = ()
+		new_commands = ()
+		# Nuevo evento = ('Evento', función)
+		basic_events = ()
+		new_events = ()
+		# Añadiendo a lista global de eventos y comandos.
+		for com in basic_commands + new_commands:
+			CommandsAndEvents.add_command(com)
+		for ev in basic_events + new_events:
+			CommandsAndEvents.add_event(ev[0], ev[1])
 
 
 ################################################################################
@@ -135,37 +140,90 @@ class BBDD_Field:
 ################################################################################
 
 class BBDD_Base:
-	''' Clase base de la base de datos. Se añadirán los diferentes campos al
-	diccionario 'campos' que serán todos subclases de BDD_Field '''
-	global VEvent, cad_basic_commands, cad_especific_commands
+	''' Clase base de la base de datos.
+	Se instanciará esta clase con una tupla como argumento que incluirá todos los
+	objetos campo que formarán la base de datos. Este objeto debe ser subclase de
+	BBDD_Field.'''
+	def __init__(self, fields:Optional[Tuple[BBDD_Field]] = None):
+		self.fields = []
+		for f in fields:
+			self.fields.append(f)
+		# Añadir los comandos del objeto al modulo.
+		self.addComAndEv()
+	
 
-	def __init__(self, *args):
-		self.fields = {}
-		for f in args:
-			self.fields[f.name] = f
-
-	def search_element(self, field:str, element_name:str) -> list:
+	def search_element(self, field:str, search:str) -> List[str]:
 		'''Devuelve lista con las claves que coincidan con una búsqueda.'''
+		# [] Utilizar expresiones regulares
 		results = []
 		for element in self.fields[field]:
-			if element_name in element.key():
+			if search in element.key():
 				results.append(element.key()) 
 			return results
 		return 'NO_MATCH'
 
-	########################## Gestión de comandos #############################
-	# Añade al help la lista de comandos del objeto.
-	cad_basic_commands += f'''
-	search_element'''
 
-	def command(self, command:str, *arg, **kwargs):
-		'''Ejecuta los comandos en este objeto.
-		Si un comando genera un evento se debe de especificar en su ejecución
-		el valor de este en la variable global 'VEvent' '''
-		if command.startswith('search_element'):
-			self.search_element(*arg, **kwargs)
+	def create_element(self, field:type, element_name:str, **element_obj:Any) -> int:
+		'''Añade un elemento al campo.'''
+		if field in self.fields:
+			i = self.fields.index(field)
+			field = self.fields[i]
+			if not element_name in field:
+				field.element.update({element_name:field.obj(**element_obj)})
+			else:
+				return f'El elemento {element_name} ya existe.'
 		else:
-			return 'INCORRECT_COMMAND'
+			return f'El campo {str(field)} no existe.'
+		# Evento que provoca
+		VEvent.append(f'CREATE ELEMENT ON FIELD {field}')
+		return 0
+
+
+	def read_element(self, field:type, element_name:str) -> Any:
+		'''Devuelve una copia de un elemento específico.'''
+		if field in self.fields:
+			i = self.fields.index(field)
+			field = self.fields[i]
+			return copy.deepcopy(field.element['element_name'])
+		else:
+			return 'El elemento {element_name} no existe.'
+
+
+	def update_element(self, field:str, element_name, element:str) -> int:
+		'''Acutaliza un elemento.'''
+		self.fields[field].update({element_name:element})
+		# Evento que provoca
+		VEvent.append(f'UPDATE ELEMENT {element_name} FROM FIELD {field}')
+		return 0
+
+
+	def delete_element(self, field:str, element_name:str) -> int:
+		'''Elimina un elemento.'''
+		del self.fields[field].element[element_name]
+		# Evento que provoca
+		VEvent.append(f'DELETE ELEMENT {element_name} FROM FIELD {field}')
+		return 0
+
+		
+	############### Introducción de comandos y eventos. #####################
+	def addComAndEv(self):
+		# newcomand = (func, help)
+		create_element = self.create_element
+		read_element = self.read_element
+		update_element = self.update_element,
+		delete_element = self.delete_element
+
+		basic_commands = (create_element, read_element, update_element,
+								delete_element)
+		new_commands = ()
+		# Nuevo evento = ('Evento', función)
+		basic_events = ()
+		new_events = ()
+		# Añadiendo a lista global de eventos y comandos.
+		for com in basic_commands + new_commands:
+			CommandsAndEvents.add_command(com)
+		for ev in basic_events + new_events:
+			CommandsAndEvents.add_event(ev[0], ev[1])
 
 
 ################################################################################
@@ -174,126 +232,89 @@ class BBDD_Base:
 
 class BBDD_Operator:
 	'''Clase operadora que se encarga de la gestión del archivo de la base de
-	datos y los comandos.'''
-	global VEvent, cad_basic_commands, cad_especific_commands
-
+	datos y los comandos. Esta será la clase que será instanciada para iniciar 
+	el trabajo con la base de datos.'''
 	def __init__(self):
-		self.BBdd = None 		# Contiene el objeto Base de datos.
-		self.ficheroBBdd = None # Nombre del fichero de la Base de datos.
-		self.events = []
+		# Inicializando Base de datos.
+		self.BBdd: BBDD_Base = BBDD_Base()
+		# Nombre del fichero de la Base de datos.
+		self.ficheroBBdd: str = None
+		# Añadir los comaandos del objeto al modulo.
+		self.addComAndEv()
+		# Inicializando gestor de comandos.
+		self.com:  CommandsAndEvents = CommandsAndEvents()
 
 
-	def load_BBdd(self, ficheroBBdd):
-		'''Carga o crea una nueva base de datos.'''
+	def load_BBdd(self, ficheroBBdd:str) -> int:
+		'''Carga nueva base de datos del tipo actual.
+		Argumentos: ficheroBBdd:str -> True'''
 		ficheroBBdd += ".pickle"
-		with open(ficheroBBdd, 'r+b') as f:
-			self.Bdd = pickle.load(f)
-			self.ficheroBBdd = ficheroBBdd
-			return True
-
-
-	def save_BBdd(self):
-		'''Guarda la base de datos actualizada.'''
-		with open(self.ficheroBBdd, 'wb') as f:
-			pickle.dump(self.Bdd, f)
-			return True
-
-
-	def create_BBdd(self, BBDD, ficheroBBdd):
-		'''Crea una nueva base de datos.'''	
-		if not os.path.isfile(ficheroBBdd + ".pickle"):
-			self.Bdd = BBDD_Base()
-			ficheroBBdd += ".pickle"
-			self.ficheroBBdd = ficheroBBdd
-			if self.save_BBdd():
-				return True
+		if os.path.isfile(ficheroBBdd):
+			with open(ficheroBBdd, 'r+b') as f:
+				self.BBdd = pickle.load(f)
+				self.ficheroBBdd = ficheroBBdd
+				return 0
 		else:
-			return 'BDD_YA_EXISTE'
+			return 'El fichero no existe'
 
 
-	def delete_BBdd(self, ficheroBBdd):
-		'''Borrado de fichero de base de datos.'''
+	def save_BBdd(self, ficheroBBdd:str = None) -> int:
+		'''Guarda la base de datos actualizada.
+		Argumentos: ficheroBBdd:str = None -> True'''
+		if not ficheroBBdd:
+			if self.ficheroBBdd:
+				ficheroBBdd = self.ficheroBBdd
+			else:
+				return 'Introducir nombre de fichero...'
+		elif ficheroBBdd:
+			ficheroBBdd += ".pickle"
+		with open(ficheroBBdd, 'wb') as f:
+			pickle.dump(self.BBdd, f)
+			return 0
+
+
+	def delete_BBdd(self, ficheroBBdd:str) -> True:
+		'''Borrado de fichero de base de datos.
+		Argumentos: ficheroBBdd:str -> True'''
 		ficheroBBdd += ".pickle"
 		if os.path.isfile(ficheroBBdd):
 			os.remove(ficheroBBdd)
 			return True
 		else:
-			return 'ARCHIVO_NO_ENCONTRADO'
+			return f'Archivo {ficheroBBdd} no encontrado'
 
-	########################## Gestión de comandos #############################
-	# Añade al help la lista de comandos del objeto.
-	cad_basic_commands += f'''
-	load_BBdd
-	save_BBdd
-	create_BBdd
-	delete_BBdd'''
+	############### Introducción de comandos y eventos. #####################
+	def addComAndEv(self):
+		# newcomand = (func, help)
+		load_BBdd = self.load_BBdd
+		save_BBdd = self.save_BBdd
+		delete_BBdd = self.delete_BBdd
 
-	def command(self, command:str, *arg, **kwargs):
-		'''Ejecuta los comandos en este objeto.'''
-		if command.startswith('load_BBdd'):
-			self.load_BBdd(*arg, **kwargs)
-		elif command.startswith('save_BBdd'):
-			self.save_BBdd(*arg, **kwargs)
-		elif command.startswith('create_BBdd'):
-			self.create_BBdd(*arg, **kwargs)
-		elif command.startswith('delete_BBdd'):
-			self.delete_BBdd(*arg, **kwargs)
-		else:
-			return 'INCORRECT_COMMAND'
+		basic_commands = (load_BBdd, save_BBdd, delete_BBdd)
+		new_commands = ()
+		# Nuevo evento = ('Evento', función)
+		basic_events = ()
+		new_events = ()
+		# Añadiendo a lista global de eventos y comandos.
+		for com in basic_commands + new_commands:
+			CommandsAndEvents.add_command(com)
+		for ev in basic_events + new_events:
+			CommandsAndEvents.add_event(ev[0], ev[1])
 
 
 ################################################################################
 #		                 Funcionando como script.                              #
 ################################################################################
 
-def readCommand(com):
-	'''Gestiona un comando recibido.'''
-	global VEvent, cad_basic_commands # Variable de control de eventos.
-
-	cad_basic_commands += f'''
-	help commands
-	prueba de evento'''
-
-	def gestionaVEvent():
-		'''Gestiona eventos surgidos por la manipulación de datos.'''
-		for i, event in enumerate(VEvent):
-			if event == 'Prueba':
-				print ('Prueba de variable de control')
-				del VEvent[i]
-			else:
-				print (f'Evento <{event}> no reconocido')
-				del VEvent[i]
-	# Gestión de comandos reconocidos.
-		# Estructura de comandos: BBDD OBJ METODO ARGS or comados auxiliares.
-	if com.startswith('BBDD'):
-		comlist = com.split(' ')
-		obj = eval(comlist[1])
-		metodo = comlist[2]
-		args = eval(comlist[3])
-		try:
-			obj.command(metodo, args)
-			return 'Comando Ejecutado'
-		except Exception as err:
-			return 'Error en comando', err
-
-	# Comandos auxiliares.
-	elif  com == 'help commands':
-		print (cad_basic_commands, cad_especific_commands)
-	elif com == 'prueba de evento':
-		VEvent.append('Prueba')
-	else:
-		print (f'Comando {com} no reconocido')
-
-	# Gestiona eventos derivados de la ejecución de comandos.
-	if len(VEvent) > 0:
-		gestionaVEvent()
-
 
 def mainLoop():
-	'''Inicia bucle para recibir comandos y getionar eventos.'''
-	while len(VEvent) == 0:
-		com = input('>>> Escribe comando.> ')
-		readCommand(com)
+	'''Inicia Operador de la base de datos y se prepara para recibir comandos.'''
+	# Inicializa clase operadora que contiene instancia de base de datos
+	# e instancia del gestor de comandos.
+	op = BBDD_Operator()
+	# Inicia bucle desde la instancia de gestor de comandos.
+	op.com.loop()
+
 
 if __name__ == '__main__':
 	mainLoop()

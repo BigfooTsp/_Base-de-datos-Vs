@@ -5,6 +5,7 @@ __pycache__/
 _Pruebas.py
 _Pruebas2.py
 .vscode/
+.vscode
 
 # C extensions
 *.so

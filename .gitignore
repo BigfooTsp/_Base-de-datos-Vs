@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 _Pruebas.py
 _Pruebas2.py
+.vscode/
 
 # C extensions
 *.so

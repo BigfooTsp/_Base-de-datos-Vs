@@ -8,9 +8,14 @@
     ],
     "python.unitTest.pyTestEnabled": false,
     "python.unitTest.nosetestsEnabled": false,
-    "python.unitTest.unittestEnabled": true,
+    "python.unitTest.unittestEnabled": false,
     "python.linting.pylintEnabled": true,
     "python.linting.pylamaEnabled": false,
     "python.linting.enabled": true,
-    "python.linting.prospectorEnabled": false
+    "python.linting.prospectorEnabled": false,
+    "python.pythonPath": "C:\\Program Files (x86)\\Python37-32\\python.exe",
+    "python.unitTest.promptToConfigure": false,
+    "python.linting.mypyEnabled": false,
+    "python.linting.flake8Enabled": false,
+
 }

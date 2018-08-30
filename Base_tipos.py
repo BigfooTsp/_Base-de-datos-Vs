@@ -1,7 +1,6 @@
-from Base_padre import Entity_attribute
-import inspect
+from Base_padre import EntityAttribute
 
-a = Entity_attribute(int,
+a = EntityAttribute(int,
                     2)
 
-print (a.value)
+print(a.value)

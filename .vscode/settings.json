@@ -22,5 +22,7 @@
         "--verbose"
     ],
     "editor.detectIndentation": false,
+    "python.linting.pep8Enabled": false,
+    "python.linting.pydocstyleEnabled": false,
 
 }

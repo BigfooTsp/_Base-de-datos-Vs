@@ -2,14 +2,14 @@
 
 class Commands:
 	None
-	'''Clase que constiene todos los comandos y eventos con efectos'''
+	"""Clase que constiene todos los comandos y eventos con efectos"""
 
 """
 	command_list: List[Callable]     = [] 
 
 	@classmethod
 	def add_command(cls, func:Callable) -> int:
-		'''Añade los comandos que incluye un objeto al ser instanciado.'''
+		"""Añade los comandos que incluye un objeto al ser instanciado."""
 		res = []
 		if not func in CommandsAndEvents.command_list:
 			CommandsAndEvents.command_list.append(func)
@@ -22,8 +22,8 @@ class Commands:
 
 
 	def command_help(self, command:Optional[str] = None) -> str:
-		'''Ayuda para los comandos. Si no se especifica, entrega lista con 
-		todos los comandos.'''
+		"""Ayuda para los comandos. Si no se especifica, entrega lista con 
+		todos los comandos."""
 		for c in self.command_list:
 			if not command:
 				cad = f"\nAYUDA DE COMANDOS:\n==============================="
@@ -40,7 +40,7 @@ class Commands:
 
 
 	def manageComands(self, com:str) -> int:
-		'''Ejecuta los comandos.'''
+		"""Ejecuta los comandos."""
 		c = com.split(' ', 1)
 		command = eval(c[0])
 		args = eval(c[1])
@@ -57,7 +57,7 @@ class Commands:
 
 
 	def loop(self):
-		'''Inicia el bucle que recibe los comandos.'''
+		"""Inicia el bucle que recibe los comandos."""
 		while True:
 			com = input('>>> Escriba comando -> ')
 			self.manageComands(com)

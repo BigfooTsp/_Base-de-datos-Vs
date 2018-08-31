@@ -13,18 +13,18 @@ from BBDD_2 import BBDD_Base, BBDD_Field, BBDD_Operator
 ################################################################################
 
 class ObjNotas:
-	'''Objeto de control para las notas.'''
+	"""Objeto de control para las notas."""
 	def __init__(self):
 		self.notas=[]
 
 	class ObjNota:
-		'''Objeto básico que contiene una nota.'''
+		"""Objeto básico que contiene una nota."""
 		def __init__(self, text:str, tag:str):
 			self.nota={"text":text, "tag":tag, "fecha":time.strftime("%d-%m-%Y  %H:%M ")}
 
 		def __str__(self):
 			cad = (
-				f'''
+				f"""
 				------------------------------------------
 				NOTA: 	{self.nota['fecha']}
 				------------------------------------------
@@ -32,17 +32,17 @@ class ObjNotas:
 				
 				{self.nota["text"]}
 				------------------------------------------	
-				''')
+				""")
 			return cad
 
 	def add_note(self, text:str, tag:str="nota") -> True:
-		'''Añade una nueva nota.''' 
+		"""Añade una nueva nota.""" 
 		self.notas.append(self.ObjNota(text, tag))
 		return True
 
 
 	def search_note(self, text:str=None, tag:str=None) -> tuple:
-		'''Busca notas por texto o tag. Devuelve tupla con índices de las notas.'''
+		"""Busca notas por texto o tag. Devuelve tupla con índices de las notas."""
 		ids=[]
 		if not text and not tag:
 			return False
@@ -54,7 +54,7 @@ class ObjNotas:
 
 
 	def edit_note(self, nota_id:int, text:str) -> True:
-		'''Edita una nota con un nuevo texto.'''
+		"""Edita una nota con un nuevo texto."""
 		if len(self.notas) >= nota_id:
 			self.notas[nota_id]['text'] = text
 			return True
@@ -62,7 +62,7 @@ class ObjNotas:
 
 
 	def view_note(self, *args:tuple) -> list:
-		'''Devuelve las notas a partir de sus índice. Sin argumentos devuelve todas las notas.'''
+		"""Devuelve las notas a partir de sus índice. Sin argumentos devuelve todas las notas."""
 		if not args:
 			return self.notas
 		elif len(self.notas) >= max(args):
@@ -74,7 +74,7 @@ class ObjNotas:
 
 
 	def del_note(self, nota_id:int) -> True:
-		'''Elimina una nota por su índice.'''
+		"""Elimina una nota por su índice."""
 		if len(self.notas) >= nota_id:
 			del self.notas[nota_id]
 			return True
@@ -82,8 +82,8 @@ class ObjNotas:
 
 
 class ObjVacaciones:
-	''' Se encargará de gestionar las vacaciones pendientes y disfrutadas
-	de los operarios así como un historial de ellas'''
+	""" Se encargará de gestionar las vacaciones pendientes y disfrutadas
+	de los operarios así como un historial de ellas"""
 	def __init__(self):
 		self.disfrutadas = None
 		self.pendientes = None
@@ -95,13 +95,13 @@ class ObjDireccion:
 
 
 class ObjAntiguedad:
-	'''Clase que contiene información sobre la antigüedad del operario.'''
+	"""Clase que contiene información sobre la antigüedad del operario."""
 	def __init__(self, fecha=None):
 		self.fecha = None
 
 	def get_antiguedad(self):
-		'''Calcula y devuelve el tiempo que lleva el operario en la empresa
-		teniendo en cuenta la fecha del dispositivo actual.'''
+		"""Calcula y devuelve el tiempo que lleva el operario en la empresa
+		teniendo en cuenta la fecha del dispositivo actual."""
 		None
 ################################################################################
 #                    Clases para los campos de la Base de Datos                #
@@ -109,8 +109,8 @@ class ObjAntiguedad:
 
 @dataclass
 class ObjVs:
-	'''Campo que contiene los operarios. Se debe de configurar el método
-	comand() con super() si hay que introducir comandos específicos'''
+	"""Campo que contiene los operarios. Se debe de configurar el método
+	comand() con super() si hay que introducir comandos específicos"""
 	nombre:str
 	id:int = None			# Nº identificación de empresa
 	telf:str = None
@@ -123,7 +123,7 @@ class ObjVs:
 
 	def __str__(self):
 		cad = (
-			f'''
+			f"""
 			------------------------------------------
 			OPERARIO:   {self.nombre}
 			------------------------------------------
@@ -135,18 +135,18 @@ class ObjVs:
 			Antigüedad 	{self.antiguedad.fecha}
 			------------------------------------------
 			
-			''')
+			""")
 		return cad
 
 
 
 class ObjServ(BBDD_Field):
-	'''Campo que contiene los servicios.'''
+	"""Campo que contiene los servicios."""
 	None
 
 
 class ObjRelaciones(BBDD_Field):
-	'''Campo que relaciona los vs y servicios de la base de datos.'''
+	"""Campo que relaciona los vs y servicios de la base de datos."""
 	None	
 
 
